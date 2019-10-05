@@ -13,7 +13,9 @@ class Header extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      visible: true
+      visible: true,
+      focus: false,
+      value: ""
     };
   }
   componentDidMount() {
@@ -31,12 +33,9 @@ class Header extends React.Component {
     }
   }
   scroollHeader = () => {
-    if (window.scrollY > 100)
-      this.setState({ visible: false });
-    if (window.scrollY < 100)
-      this.setState({ visible: true });
-    if (this.props.location.pathname !== "/")
-      this.setState({ visible: false });
+    if (window.scrollY > 50) this.setState({ visible: false });
+    if (window.scrollY < 50) this.setState({ visible: true });
+    if (this.props.location.pathname !== "/") this.setState({ visible: false });
   };
   scrollToTop = () => {
     window.scrollTo({
@@ -49,12 +48,35 @@ class Header extends React.Component {
       });
     }
   };
+  formControl = event => {
+    this.setState({
+      value: event.target.value
+    });
+  };
+  formSubmit = event => {
+    event.preventDefault();
+    this.search(this.state.value);
+  };
+  search = (text) => {
+    this.props.store.searchPhoto(text);
+  }
+  focus = () => {
+    this.setState({
+      focus: true
+    });
+  };
+  blur = () => {
+    if (this.state.value === "") {
+      this.setState({
+        focus: false
+      });
+    }
+  };
   render() {
-    let { visible } = this.state;
+    let { visible, value, focus } = this.state;
     const style = {
       maxHeight: "20px",
       position: "fixed",
-      margin: "0",
       padding: "10px 10px 20px 10px"
     };
     return (
@@ -81,16 +103,21 @@ class Header extends React.Component {
             </div>
           </div>
           <div className="search">
-            <form>
-              <span>Поиск</span>
-              <input />
+            <form onSubmit={this.formSubmit}>
+              {!focus ? <span>Поиск</span> : null}
+              <input
+                onChange={this.formControl}
+                value={value}
+                onFocus={this.focus}
+                onBlur={this.blur}
+              />
               <div className="input-gradient"></div>
             </form>
             <div className="slider">
               <div className="slider-gradient"></div>
               <Slider {...sliderSettings}>
                 {history.map((item, i) => (
-                  <p key={i}>{item}</p>
+                  <p onClick={() => this.search(item.toString())} key={i}>{item}</p>
                 ))}
               </Slider>
             </div>

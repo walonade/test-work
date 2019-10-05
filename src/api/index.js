@@ -1,6 +1,6 @@
 import parse from "url-parse";
 import makeRequest from "./helperConnect";
-import querystring from "querystring";
+import {stringify} from "querystring";
 import {
   API_URL,
   ACCESSKEY,
@@ -21,7 +21,7 @@ const options = {
   }
 };
 
-let querystrings = querystring.stringify({
+let querystrings = stringify({
   client_id: ACCESSKEY,
   redirect_uri: REDIRECT_URI,
   response_type: "code",
@@ -29,8 +29,13 @@ let querystrings = querystring.stringify({
 });
 
 const baseRequest = (i = 1) => {
-  const request = `${API_URL}/photos/?page=${i}`;
-  return makeRequest(request, options);
+  const request = `${API_URL}/photos`;
+  const query = {
+    per_page: 30,
+    page: i
+  };
+  let url = decodeURIComponent(`${request}?${stringify(query)}`)
+  return makeRequest(url, options);
 };
 
 const photoRequest = id => {
@@ -43,10 +48,15 @@ const download = id => {
   return makeRequest(request, options);
 };
 
-const searcher = (keyword = "") => {
+const searcher = (keyword = "", i = 1) => {
   const request = `${API_URL}/search/photos`;
-  const searchOptions = { ...options, query: keyword };
-  return makeRequest(request, searchOptions);
+  const query = {
+    query: keyword,
+    per_page: 30,
+    page: i
+  };
+  let url = decodeURIComponent(`${request}?${stringify(query)}`)
+  return makeRequest(url, options);
 };
 
 export { baseRequest, photoRequest, download, searcher };
